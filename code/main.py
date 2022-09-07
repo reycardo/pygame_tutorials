@@ -39,8 +39,8 @@ class Game:
 			self.max_level = new_max_level
 		self.overworld = Overworld(current_level,self.max_level,screen,self.create_level)
 		self.status = 'overworld'
-		self.overworld_bg_music.play(loops = -1)
 		self.level_bg_music.stop()
+		self.overworld_bg_music.play(loops = -1)		
 
 	def change_coins(self,amount):
 		self.coins += amount
