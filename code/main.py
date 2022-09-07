@@ -3,6 +3,7 @@ from settings import *
 from level import Level
 from overworld import Overworld
 from ui import UI
+from debug import debug
 
 class Game:
 	def __init__(self):
@@ -81,6 +82,7 @@ while True:
 	
 	screen.fill('grey')
 	game.run()
+	debug(pygame.mouse.get_pos(),pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])	
 
 	pygame.display.update()
 	clock.tick(60)
