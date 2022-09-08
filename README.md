@@ -1,13 +1,8 @@
-# 2D-Mario-style-platformer
+# Pygame Tutorials
 
-## SETUP UBUNTU
-- `python3 -m venv venv/2D-Mario-style-platformer`
-- `source venv/2D-Mario-style-platformer/bin/activate`
-- `pip install -r requirements.txt`
-
-## SETUP WINDOWS
+## SETUP
 - `conda create --prefix ./venv python=3.10`
-- `conda activate C:\workspaces\Repos\mario_style_platformer_tutorial\venv`
+- `conda activate C:\workspaces\Repos\pygame_tutorials\venv`
 - `pip install -r requirements.txt`
 
 # Build distributable (data files need to be zipped with .exe after build)
