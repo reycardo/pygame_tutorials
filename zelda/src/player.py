@@ -3,8 +3,9 @@ import pygame
 from settings import *
 from debug import debug
 from support import import_folder
+from entity import Entity
 
-class Player(pygame.sprite.Sprite):
+class Player(Entity):
 	def __init__(
 		self, 
 		pos: Tuple[int,int],
@@ -21,12 +22,9 @@ class Player(pygame.sprite.Sprite):
 		
 		# graphics setup
 		self.import_player_assets()
-		self.status = "down"
-		self.frame_index = 0
-		self.animation_speed = 0.15
+		self.status = "down"				
 
-		# movement		
-		self.direction = pygame.math.Vector2()
+		# movement				
 		self.attacking = False
 		self.attack_cd = 400
 		self.attack_time = None
@@ -56,6 +54,11 @@ class Player(pygame.sprite.Sprite):
 		self.energy = self.stats["energy"]
 		self.speed = self.stats["speed"]
 		self.exp = 123
+
+		# damage timer
+		self.vulnerable = True
+		self.hurt_time = None
+		self.invulnerability_duration = 500
 
 	def import_player_assets(self):
 		character_path = '../graphics/player/'
@@ -125,45 +128,24 @@ class Player(pygame.sprite.Sprite):
 					self.magic_index = 0
 				self.magic = list(magic_data.keys())[self.magic_index]
 
-	def move(self,speed):
-		if self.direction.magnitude() != 0:
-			self.direction = self.direction.normalize()
-		
-		self.hitbox.x += self.direction.x * speed
-		self.collision("horziontal")
-		self.hitbox.y += self.direction.y * speed		
-		self.collision("vertical")
-		self.rect.center = self.hitbox.center
-
-	def collision(self,direction):
-		if direction == 'horziontal':
-			for sprite in self.obstacle_sprites:
-				if sprite.hitbox.colliderect(self.hitbox):
-					if self.direction.x > 0:
-						self.hitbox.right = sprite.hitbox.left
-					if self.direction.x < 0:
-						self.hitbox.left = sprite.hitbox.right
-
-		if direction == 'vertical':
-			for sprite in self.obstacle_sprites:
-				if sprite.hitbox.colliderect(self.hitbox):
-					if self.direction.y > 0:
-						self.hitbox.bottom = sprite.hitbox.top
-					if self.direction.y < 0:
-						self.hitbox.top = sprite.hitbox.bottom
-
 	def cooldowns(self):
 		current_time = pygame.time.get_ticks()
 		if self.attacking:		
-			if current_time - self.attack_time >= self.attack_cd:
+			if current_time - self.attack_time >= self.attack_cd + weapon_data[self.weapon]['cooldown']:
 				self.attacking = False		
 				self.destroy_attack()
+		
 		if not self.can_switch_weapon:
 			if current_time - self.weapon_switch_time >= self.switch_duration_cd:
 				self.can_switch_weapon = True		
+		
 		if not self.can_switch_magic:
 			if current_time - self.magic_switch_time >= self.switch_duration_cd:
 				self.can_switch_magic = True					
+		
+		if not self.vulnerable:
+			if current_time - self.hurt_time >= self.invulnerability_duration:
+				self.vulnerable = True
 
 	def get_status(self):
 		# idle
@@ -194,6 +176,18 @@ class Player(pygame.sprite.Sprite):
 		# set image
 		self.image = animation[int(self.frame_index)]
 		self.rect = self.image.get_rect(center = self.hitbox.center)		
+
+		# flicker	
+		if not self.vulnerable:
+			alpha = self.wave_value()
+			self.image.set_alpha(alpha)
+		else:
+			self.image.set_alpha(255)
+
+	def get_full_weapon_damage(self):
+		base_damage = self.stats['attack']
+		weapon_damage = weapon_data[self.weapon]['damage']
+		return base_damage + weapon_damage
 
 	def update(self):
 		self.get_input()
