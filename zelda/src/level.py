@@ -69,7 +69,7 @@ class Level:
                         
                         if style == 'object':
                             object_surf = graphics['objects'][int(col)]
-                            Tile((x,y),[self.visible_sprites, self.obstacle_sprites],'objects', object_surf)
+                            Tile((x,y),[self.visible_sprites, self.obstacle_sprites],'object', object_surf)
                         
                         if style == 'entities':
                             if col == '394':
