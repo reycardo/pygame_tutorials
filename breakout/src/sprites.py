@@ -1,5 +1,6 @@
 from random import choice
 import pygame
+from pygame import sprite
 from settings import *
 
 class Player(pygame.sprite.Sprite):
@@ -43,11 +44,12 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = round(self.pos.x)
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, groups, player: Player):
+    def __init__(self, groups, player: Player, blocks):
         super().__init__(groups)
 
         # collision objects
         self.player = player
+        self.blocks = blocks
 
         # graphics setup
         self.image = pygame.image.load('../graphics/other/ball.png').convert_alpha()
@@ -85,10 +87,9 @@ class Ball(pygame.sprite.Sprite):
                 self.rect.top = WINDOW_HEIGHT
                 self.pos.y = self.rect.y
 
-
     def collision(self, direction):
         # find overlapping objects
-        overlap_sprites = []
+        overlap_sprites = pygame.sprite.spritecollide(self,self.blocks,False)
         if self.rect.colliderect(self.player.rect):
             overlap_sprites.append(self.player)
 
@@ -96,24 +97,30 @@ class Ball(pygame.sprite.Sprite):
             if direction == "horizontal":
                 for sprite in overlap_sprites:
                     if self.rect.right >= sprite.rect.left and self.old_rect.right <= sprite.old_rect.left: # left to right
-                        self.rect.right = sprite.rect.left
+                        self.rect.right = sprite.rect.left - 1
                         self.pos.x = self.rect.x
                         self.direction.x *= -1
                     if self.rect.left <= sprite.rect.right and self.old_rect.left >= sprite.old_rect.right: # right to left
-                        self.rect.left = sprite.rect.right
+                        self.rect.left = sprite.rect.right + 1
                         self.pos.x = self.rect.x
                         self.direction.x *= -1
+                    
+                    if getattr(sprite,'health',None):
+                        sprite.get_damage(1)
 
             if direction == "vertical":
                 for sprite in overlap_sprites:
                     if self.rect.bottom >= sprite.rect.top and self.old_rect.bottom <= sprite.old_rect.top: # top to bottom
-                        self.rect.bottom = sprite.rect.top
+                        self.rect.bottom = sprite.rect.top - 1
                         self.pos.y = self.rect.y
                         self.direction.y *= -1
                     if self.rect.top <= sprite.rect.bottom and self.old_rect.top >= sprite.old_rect.bottom: # bottom to top
-                        self.rect.top = sprite.rect.bottom
+                        self.rect.top = sprite.rect.bottom + 1
                         self.pos.y = self.rect.y
                         self.direction.y *= -1
+                    
+                    if getattr(sprite,'health',None):
+                        sprite.get_damage(1)
 
     def update(self, dt):
         if self.active:
@@ -137,3 +144,21 @@ class Ball(pygame.sprite.Sprite):
         else:
             self.rect.midbottom = self.player.rect.midtop
             self.pos = pygame.math.Vector2(self.rect.topleft)
+
+class Block(pygame.sprite.Sprite):
+    def __init__(self, block_type, pos, groups):
+        super().__init__(groups)
+        self.image = pygame.Surface((BLOCK_WIDTH,BLOCK_HEIGHT))
+        self.rect = self.image.get_rect(topleft = pos)
+        self.old_rect = self.rect.copy()
+
+        # dmg info
+        self.health = int(block_type)
+
+    def get_damage(self, amount):
+        self.health -= amount
+
+        if self.health > 0:
+            pass
+        else:
+            self.kill()
