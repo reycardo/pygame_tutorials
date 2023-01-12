@@ -7,13 +7,16 @@ ENV INST_SCRIPTS $STARTUPDIR/install
 WORKDIR $HOME
 
 ######### Customize Container Here ###########
+RUN git clone https://github.com/reycardo/pygame_tutorials.git
+RUN apt-get update
+RUN apt-get -y install python3-pip python3-venv
+ENV VIRTUAL_ENV=venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+WORKDIR $HOME/pygame_tutorials/zelda/src
+RUN pip install -r ../../requirements.txt
 
-RUN  git clone https://github.com/reycardo/pygame_tutorials.git \
-    && python3 -m venv venv \
-    && source venv/bin/activate \
-    && pip install -r requirements.txt \
-    && cd ~/workspaces/pygame_tutorials/zelda/src \
-    && python main.py    
+CMD ["python" "main.py"]
 
 ######### End Customizations ###########
 
