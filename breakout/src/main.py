@@ -1,5 +1,4 @@
 from random import choice, randint
-from turtle import width
 import pygame,sys,time
 from settings import *
 from sprites import Player, Ball, Block, Upgrade, Projectile
