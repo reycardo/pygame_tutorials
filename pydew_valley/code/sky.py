@@ -5,6 +5,20 @@ from sprites import Generic
 from random import randint, choice
 from timer_support import Timer
 
+class Sky:
+	def __init__(self):
+		self.display_surface = pygame.display.get_surface()
+		self.full_surf = pygame.Surface((SCREEN_WIDTH,SCREEN_HEIGHT))
+		self.star_color = [255,255,255]
+		self.end_color = (38,101,189)
+
+	def display(self, dt):
+		for index, value in enumerate(self.end_color):
+			if self.star_color[index] > value:
+				self.star_color[index] -= 2 * dt
+		self.full_surf.fill(self.star_color)
+		self.display_surface.blit(self.full_surf, (0,0), special_flags= pygame.BLEND_RGB_MULT)
+
 class Drop(Generic):
 	def __init__(self, pos, surf: pygame.surface.Surface, moving, groups, z):
 		
@@ -29,7 +43,6 @@ class Drop(Generic):
 		# timer
 		if pygame.time.get_ticks() - self.start_time > self.lifetime:
 			self.kill()
-
 
 class Rain:
 	def __init__(self, all_sprites):
